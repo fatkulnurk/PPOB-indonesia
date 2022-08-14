@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "936770666353",
+    "project_id": "kerupiah",
+    "storage_bucket": "kerupiah.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936770666353:android:d20c0ef970dec5043800d0",
+        "android_client_info": {
+          "package_name": "com.kerupiah.lite.kerupiah_lite_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936770666353-miilik4fs2h4s35pajq093s1npvh359l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBeVkLao0aSokMoLwQDwI14KTGHULpkNJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936770666353-miilik4fs2h4s35pajq093s1npvh359l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
