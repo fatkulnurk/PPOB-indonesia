@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kerupiah_lite_app/widgets/web_view_stack.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import '../../../widgets/navigation_controls.dart';
+import 'package:kerupiah_lite_app/widgets/navigation_controls.dart';
+import 'package:kerupiah_lite_app/helpers/config.dart' as config;
 
 class ShowTransactionScreen extends StatefulWidget {
   const ShowTransactionScreen({Key? key, required this.id}) : super(key: key);
@@ -21,7 +22,7 @@ class _ShowPageState extends State<ShowTransactionScreen> {
   void initState() {
     super.initState();
     setState(() {
-      url = 'https://kerupiah.com/invoices/${widget.id}';
+      url = '${config.baseUrl}/invoices/${widget.id}';
     });
   }
 

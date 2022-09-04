@@ -8,6 +8,7 @@ import 'package:kerupiah_lite_app/screens/dashboard/balances/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/deposits/create_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/deposits/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/home_screen.dart';
+import 'package:kerupiah_lite_app/screens/dashboard/profiles/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/transactions/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/login_screen.dart';
 import 'package:kerupiah_lite_app/screens/page_screen.dart';
@@ -15,6 +16,7 @@ import 'package:kerupiah_lite_app/screens/signup_screen.dart';
 import 'package:kerupiah_lite_app/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:kerupiah_lite_app/helpers/config.dart' as config;
 
 Future<void> main() async {
   runApp(App());
@@ -76,7 +78,7 @@ class App extends StatelessWidget {
       routeInformationProvider: _router.routeInformationProvider,
       routeInformationParser: _router.routeInformationParser,
       routerDelegate: _router.routerDelegate,
-      title: 'KeRupiah',
+      title: config.appName,
       builder: EasyLoading.init(),
     );
   }
@@ -130,6 +132,12 @@ class App extends StatelessWidget {
         path: '/dashboard/transactions',
         builder: (BuildContext context, GoRouterState state) {
           return const TransactionHomePageScreen();
+        },
+      ),
+      GoRoute(
+        path: '/dashboard/profiles/home',
+        builder: (BuildContext context, GoRouterState state) {
+          return const ProfileHomePageScreen();
         },
       ),
       GoRoute(

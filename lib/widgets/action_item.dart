@@ -40,8 +40,12 @@ class ActionItem extends StatelessWidget {
                 topLeft: Radius.circular(8.0),
                 topRight: Radius.circular(8.0),
               ),
-              child: Image.network(imageUrl ?? '',
-                  width: 50, height: 50, fit: BoxFit.fill),
+              child: Image.network(
+                imageUrl ?? '',
+                width: 45,
+                height: 45,
+                fit: BoxFit.fill,
+              ),
             ),
             Center(
               child: ListTile(
@@ -54,7 +58,10 @@ class ActionItem extends StatelessWidget {
                         overflow: TextOverflow.clip,
                         strutStyle: const StrutStyle(fontSize: 12.0),
                         text: TextSpan(
-                          style: const TextStyle(color: Colors.black),
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 13,
+                          ),
                           text: title,
                         ),
                       ),

@@ -6,7 +6,6 @@ import 'package:kerupiah_lite_app/helpers/currency.dart';
 import 'package:kerupiah_lite_app/helpers/time.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/balances/show_screen.dart';
 import 'package:kerupiah_lite_app/services/balance.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class BalanceHomePageScreen extends StatefulWidget {

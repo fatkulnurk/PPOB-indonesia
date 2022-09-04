@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:kerupiah_lite_app/helpers/config.dart' as config;
 
 class WebViewRenderHtmlStack extends StatefulWidget {
   WebViewRenderHtmlStack(
@@ -73,23 +75,19 @@ class _WebViewStackState extends State<WebViewRenderHtmlStack> {
               });
             },
             javascriptMode: JavascriptMode.unrestricted,
-            navigationDelegate: (navigation) {
-              print("dari: navigationDelegate");
-              print(navigation.url);
-              final host = Uri.parse(navigation.url).host;
-              if (host.contains('duitku.com')) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Blocking navigation to $host',
-                    ),
-                  ),
-                );
+            navigationDelegate: (navigation) async {
+              if (!navigation.url.contains(config.baseUrl)) {
+                if (!await launchUrlString(
+                  navigation.url,
+                  mode: LaunchMode.externalApplication,
+                )) {
+                  throw 'Could not launch $navigation.url';
+                }
 
                 return NavigationDecision.prevent;
+              } else {
+                return NavigationDecision.navigate;
               }
-
-              return NavigationDecision.navigate;
             },
           ),
         if (loadingPercentage < 100)

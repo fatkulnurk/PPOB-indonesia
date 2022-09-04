@@ -8,7 +8,7 @@ import 'package:kerupiah_lite_app/helpers/currency.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/deposits/show_screen.dart';
 import 'package:kerupiah_lite_app/services/deposit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../helpers/time.dart';
+import 'package:kerupiah_lite_app/helpers/time.dart';
 
 class DepositHomePageScreen extends StatefulWidget {
   const DepositHomePageScreen({Key? key}) : super(key: key);

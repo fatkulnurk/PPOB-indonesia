@@ -165,14 +165,6 @@ class _HomePageState extends State<TransactionHomePageScreen> {
                       },
                     ),
                   ),
-                  Container(
-                    margin: EdgeInsets.only(top: 20),
-                    alignment: Alignment.centerLeft,
-                    child: const Text(
-                      "Riwayat Transaksi:",
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
                   if (fromDateController.text.isEmpty &&
                       toDateController.text.isEmpty)
                     Container(
@@ -186,6 +178,14 @@ class _HomePageState extends State<TransactionHomePageScreen> {
                         ),
                       ),
                     ),
+                  Container(
+                    margin: EdgeInsets.only(top: 20, bottom: 10,),
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Riwayat Transaksi:",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
                   if (transactions.length > 0)
                     Container(
                       margin: const EdgeInsets.fromLTRB(1, 1, 1, 1),
@@ -207,7 +207,7 @@ class _HomePageState extends State<TransactionHomePageScreen> {
                             }),
                             child: Container(
                               margin: EdgeInsets.only(top: 5),
-                              padding: EdgeInsets.all(10),
+                              padding: EdgeInsets.fromLTRB(10, 20, 10, 20),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(5),
@@ -285,102 +285,6 @@ class _HomePageState extends State<TransactionHomePageScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class TransactionWidget extends StatefulWidget {
-  const TransactionWidget({Key? key}) : super(key: key);
-
-  @override
-  State<TransactionWidget> createState() => _TransactionWidgetState();
-}
-
-class _TransactionWidgetState extends State<TransactionWidget> {
-  late List<dynamic> transactions = List.empty();
-  int transactionLength = 0;
-
-  Future<void> getInitializeData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    var url = Uri.parse('https://kerupiah.com/api/transactions');
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
-    });
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
-      List<dynamic> items = data['data'];
-      setState(() {
-        transactions = items;
-        transactionLength = transactions.length;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getInitializeData();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var textStyle = Theme.of(context).textTheme;
-    final dateFormat = DateFormat('yyyy-MM-dd hh:mm');
-
-    return ListView(
-      children: ListTile.divideTiles(
-        color: Colors.deepPurple,
-        tiles: transactions.map(
-          (transaction) => ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ShowTransactionScreen(
-                    id: transaction['id'].toString(),
-                  ),
-                ),
-              );
-            },
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              child:
-                  Text(transaction['status_name'].toString().substring(0, 2)),
-            ),
-            title: Text(dateFormat
-                .format(DateTime.parse(transaction['created_at'].toString()))),
-            subtitle: Flexible(
-              child: RichText(
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                strutStyle: const StrutStyle(
-                    fontSize: 10.0, fontWeight: FontWeight.w500),
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black),
-                  text: transaction['customer_no'].toString(),
-                ),
-              ),
-            ),
-            trailing: Flexible(
-              child: RichText(
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                strutStyle: const StrutStyle(fontSize: 12.0),
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black),
-                  text: transaction['status_name'].toString(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ).toList(),
     );
   }
 }

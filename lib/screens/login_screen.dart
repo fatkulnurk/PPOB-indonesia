@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../services/auth.dart';
+import 'package:kerupiah_lite_app/services/auth.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});

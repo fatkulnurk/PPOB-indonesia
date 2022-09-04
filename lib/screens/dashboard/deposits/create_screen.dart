@@ -25,7 +25,7 @@ class _CreateDepositState extends State<CreateDepositScreen> {
   }
 
   void initializeData() async {
-    Map<String, dynamic> data = await PaymentMethodService().get(withoutBalance: 1, price: 0);
+    Map<String, dynamic> data = await PaymentMethodService().get(withoutBalance: 1);
     if (data.isNotEmpty) {
       List<dynamic> items = data['data'];
       setState(() {

@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kerupiah_lite_app/widgets/web_view_render_html.dart';
+import 'package:kerupiah_lite_app/widgets/web_view_stack.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:kerupiah_lite_app/helpers/config.dart' as config;
 
 class ShowBalanceScreen extends StatefulWidget {
   final String balanceId;
@@ -23,7 +25,7 @@ class _MyStatefulWidget extends State<ShowBalanceScreen> {
   void initState() {
     super.initState();
     setState(() {
-      url = 'https://kerupiah.com/api/web-views/balances/${widget.balanceId}';
+      url = '${config.baseUrl}/api/web-views/balances/${widget.balanceId}';
     });
   }
 

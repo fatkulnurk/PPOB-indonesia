@@ -7,7 +7,8 @@ import 'package:kerupiah_lite_app/services/category.dart';
 import 'package:kerupiah_lite_app/widgets/drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import '../../widgets/action_item.dart';
+import 'package:kerupiah_lite_app/widgets/action_item.dart';
+import 'package:kerupiah_lite_app/helpers/config.dart' as config;
 
 class DashboardHomePageScreen extends StatefulWidget {
   const DashboardHomePageScreen({Key? key}) : super(key: key);
@@ -44,6 +45,26 @@ class _DashboardHomePageScreen extends State<DashboardHomePageScreen> {
         false;
   }
 
+  int _selectedNavbar = 0;
+
+  void _changeSelectedNavBar(int index) {
+    switch (index) {
+      case 1:
+        context.go('/dashboard/transactions');
+        break;
+      case 2:
+        context.go('/dashboard/deposits/create');
+        break;
+      case 3:
+        context.go('/dashboard/profiles/home');
+        break;
+
+    }
+    // setState(() {
+    //   _selectedNavbar = index;
+    // });
+  }
+
   @override
   Widget build(BuildContext context) {
     var textStyle = Theme.of(context).textTheme;
@@ -53,7 +74,32 @@ class _DashboardHomePageScreen extends State<DashboardHomePageScreen> {
       child: Scaffold(
         drawer: const DrawerWidget(),
         appBar: AppBar(
-          title: const Text("KeRupiah.Com"),
+          title: const Text(config.appName),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history),
+              label: "Transaksi",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.wallet_rounded),
+              label: "Isi Saldo",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: "Akun",
+            ),
+          ],
+          currentIndex: _selectedNavbar,
+          selectedItemColor: Colors.blueAccent,
+          unselectedItemColor: Colors.grey,
+          showUnselectedLabels: true,
+          onTap: _changeSelectedNavBar,
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -61,7 +107,7 @@ class _DashboardHomePageScreen extends State<DashboardHomePageScreen> {
               children: [
                 BalanceSection(),
                 Container(
-                  padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                  padding: EdgeInsets.fromLTRB(0, 25, 0, 20),
                   child: Text(
                     'PRODUK & LAYANAN',
                     style: textStyle.headline5,
@@ -92,7 +138,7 @@ class _DashboardHomePageScreen extends State<DashboardHomePageScreen> {
                 const Align(
                   alignment: Alignment.center,
                   child: Text(
-                    'Copyright © 2022 KeRupiah.Com',
+                    'Copyright © 2022 ${config.appName}',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.black,

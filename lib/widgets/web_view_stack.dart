@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:kerupiah_lite_app/helpers/config.dart' as config;
 
 class WebViewStack extends StatefulWidget {
-  const WebViewStack({required this.controller, required this.url, Key? key}) : super(key: key); // Modify
+  const WebViewStack({required this.controller, required this.url, Key? key})
+      : super(key: key); // Modify
 
   final Completer<WebViewController> controller;
   final String url;
@@ -31,8 +33,6 @@ class _WebViewStackState extends State<WebViewStack> {
             widget.controller.complete(webViewController);
           },
           onPageStarted: (url) {
-            print("akses: onpagestarted");
-            print(url);
             setState(() {
               loadingPercentage = 0;
             });
@@ -48,23 +48,19 @@ class _WebViewStackState extends State<WebViewStack> {
             });
           },
           javascriptMode: JavascriptMode.unrestricted,
-          navigationDelegate: (navigation) {
-            print("dari: navigationDelegate");
-            print(navigation.url);
-            final host = Uri.parse(navigation.url).host;
-            if (host.contains('duitku.com')) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Blocking navigation to $host',
-                  ),
-                ),
-              );
+          navigationDelegate: (navigation) async {
+            if (!navigation.url.contains(config.baseUrl)) {
+              if (!await launchUrlString(
+                navigation.url,
+                mode: LaunchMode.externalApplication,
+              )) {
+                throw 'Could not launch $navigation.url';
+              }
 
               return NavigationDecision.prevent;
+            } else {
+              return NavigationDecision.navigate;
             }
-
-            return NavigationDecision.navigate;
           },
         ),
         if (loadingPercentage < 100)
@@ -75,14 +71,5 @@ class _WebViewStackState extends State<WebViewStack> {
           ),
       ],
     );
-  }
-
-
-  _launchURL(String url) async {
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else {
-      throw 'Could not launch $url';
-    }
   }
 }

@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kerupiah_lite_app/services/auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import '../widgets/bezeier.dart';
+import 'package:kerupiah_lite_app/widgets/bezeier.dart';
 import 'dashboard/deposits/home_screen.dart';
 
 class SignUpScreen extends StatefulWidget {

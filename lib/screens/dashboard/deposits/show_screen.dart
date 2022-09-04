@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kerupiah_lite_app/widgets/web_view_render_html.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:kerupiah_lite_app/helpers/config.dart' as config;
 
 class ShowDepositScreen extends StatefulWidget {
   final String id;
@@ -22,7 +23,7 @@ class _MyStatefulWidget extends State<ShowDepositScreen> {
   void initState() {
     super.initState();
     setState(() {
-      url = 'https://kerupiah.com/api/web-views/deposits/${widget.id}';
+      url = '${config.baseUrl}/api/web-views/deposits/${widget.id}';
     });
   }
 
