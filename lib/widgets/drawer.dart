@@ -75,6 +75,8 @@ class _DrawlerWidgetState extends State<DrawerWidget> {
               if (success) {
                 return context.go('/');
               }
+
+              return context.go('/');
             },
           ),
           const Divider(height: 25, thickness: 1),

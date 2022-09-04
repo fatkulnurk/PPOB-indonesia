@@ -18,19 +18,26 @@ class PageWebviewScreen extends StatefulWidget {
 class _PageWebviewState extends State<PageWebviewScreen> {
   final controller = Completer<WebViewController>();
 
+  Future<bool> _onWillPop() async {
+    context.go('/dashboard');
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => {
-            context.go('/dashboard')
-          },
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/dashboard'),
+          ),
+          title: Text(widget.title),
         ),
-        title: Text(widget.title),
+        body: WebViewStack(controller: controller, url: widget.url),
       ),
-      body: WebViewStack(controller: controller, url: widget.url),
     );
   }
 }

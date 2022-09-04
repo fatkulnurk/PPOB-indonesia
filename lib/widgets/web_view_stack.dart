@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewStack extends StatefulWidget {
@@ -29,6 +31,8 @@ class _WebViewStackState extends State<WebViewStack> {
             widget.controller.complete(webViewController);
           },
           onPageStarted: (url) {
+            print("akses: onpagestarted");
+            print(url);
             setState(() {
               loadingPercentage = 0;
             });
@@ -44,12 +48,41 @@ class _WebViewStackState extends State<WebViewStack> {
             });
           },
           javascriptMode: JavascriptMode.unrestricted,
+          navigationDelegate: (navigation) {
+            print("dari: navigationDelegate");
+            print(navigation.url);
+            final host = Uri.parse(navigation.url).host;
+            if (host.contains('duitku.com')) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Blocking navigation to $host',
+                  ),
+                ),
+              );
+
+              return NavigationDecision.prevent;
+            }
+
+            return NavigationDecision.navigate;
+          },
         ),
         if (loadingPercentage < 100)
           LinearProgressIndicator(
             value: loadingPercentage / 100.0,
+            color: Colors.yellowAccent,
+            backgroundColor: Colors.black,
           ),
       ],
     );
+  }
+
+
+  _launchURL(String url) async {
+    if (await canLaunchUrlString(url)) {
+      await launchUrlString(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

@@ -73,10 +73,30 @@ class _WebViewStackState extends State<WebViewRenderHtmlStack> {
               });
             },
             javascriptMode: JavascriptMode.unrestricted,
+            navigationDelegate: (navigation) {
+              print("dari: navigationDelegate");
+              print(navigation.url);
+              final host = Uri.parse(navigation.url).host;
+              if (host.contains('duitku.com')) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Blocking navigation to $host',
+                    ),
+                  ),
+                );
+
+                return NavigationDecision.prevent;
+              }
+
+              return NavigationDecision.navigate;
+            },
           ),
         if (loadingPercentage < 100)
           LinearProgressIndicator(
             value: loadingPercentage / 100.0,
+            color: Colors.yellowAccent,
+            backgroundColor: Colors.black,
           ),
       ],
     );

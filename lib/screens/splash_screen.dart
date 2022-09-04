@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:kerupiah_lite_app/services/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -12,20 +13,10 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreen extends State<SplashScreen> {
   Future<void> checkUserIsAuthentication() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
+    bool checkAuth = await AuthService().check();
 
-    var url = Uri.parse('https://kerupiah.com/api/check');
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
-    });
-
-    if (response.statusCode == 200) {
+    if (checkAuth) {
       context.go('/dashboard');
-    } else {
-      // context.go('/login');
     }
   }
 
@@ -45,9 +36,6 @@ class _SplashScreen extends State<SplashScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           height: MediaQuery.of(context).size.height,
           decoration: BoxDecoration(
-            // borderRadius: const BorderRadius.all(
-            //   Radius.circular(5),
-            // ),
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.shade200,
@@ -150,6 +138,19 @@ class _SplashScreen extends State<SplashScreen> {
                   ),
                 ),
               ),
+              const SizedBox(
+                height: 30,
+              ),
+              const Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'Copyright © 2022 KeRupiah.Com',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
+                ),
+              )
             ],
           ),
         ),

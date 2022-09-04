@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kerupiah_lite_app/services/balance.dart';
+import 'package:kerupiah_lite_app/services/category.dart';
 import 'package:kerupiah_lite_app/widgets/drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -20,40 +22,88 @@ class _DashboardHomePageScreen extends State<DashboardHomePageScreen> {
     super.initState();
   }
 
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Apakah anda yakin?'),
+            content: const Text(
+                'Apakah anda yakin ingin menutup aplikasi (anda masih dalam keadaan login).'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Batalkan'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Tutup Aplikasi'),
+              ),
+            ],
+          ),
+        )) ??
+        false;
+  }
+
   @override
   Widget build(BuildContext context) {
     var textStyle = Theme.of(context).textTheme;
 
-    return Scaffold(
-      drawer: const DrawerWidget(),
-      appBar: AppBar(
-        title: const Text("KeRupiah.Com"),
-        // actions: [
-        //   IconButton(
-        //     onPressed: () {
-        //       context.go('/dashboard');
-        //     },
-        //     icon: const Icon(
-        //       Icons.notifications_active_outlined,
-        //       color: Colors.yellow,
-        //     ),
-        //   )
-        // ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              BalanceSection(),
-              Container(
-                padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
-                child: Text(
-                  'PRODUK & LAYANAN',
-                  style: textStyle.headline5,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        drawer: const DrawerWidget(),
+        appBar: AppBar(
+          title: const Text("KeRupiah.Com"),
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                BalanceSection(),
+                Container(
+                  padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+                  child: Text(
+                    'PRODUK & LAYANAN',
+                    style: textStyle.headline5,
+                  ),
                 ),
-              ),
-              MyStatefulWidget(),
-            ],
+                MyStatefulWidget(),
+                const SizedBox(
+                  height: 20,
+                ),
+                // const Card(
+                //   margin: EdgeInsets.all(1),
+                //   child: ListTile(
+                //     title: Padding(
+                //       padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                //       child: Align(
+                //         alignment: Alignment.topCenter,
+                //         child: Text(
+                //           "Jika terdapat kendala dalam transaksi atau deposit, silakan menghubungi kami menggunakan kontak yang tertera di halaman hubungi kami.",
+                //           style: TextStyle(fontSize: 16),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                const SizedBox(
+                  height: 30,
+                ),
+                const Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Copyright © 2022 KeRupiah.Com',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -85,24 +135,13 @@ class _BalanceSection extends State<BalanceSection> {
 
   Future<void> getInitializeData() async {
     final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    var url = Uri.parse('https://kerupiah.com/api/balances');
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
-    });
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
-      if (data.isNotEmpty) {
-        setState(() {
-          balance = data['data']['balance'];
-          balanceString = data['data']['balance_string'];
-          prefs.setString('balance_string', balanceString);
-        });
-      }
+    Map<String, dynamic> data = await BalanceService().get();
+    if (data.isNotEmpty) {
+      setState(() {
+        balance = data['data']['balance'];
+        balanceString = data['data']['balance_string'];
+        prefs.setString('balance_string', balanceString);
+      });
     }
   }
 
@@ -210,7 +249,7 @@ class _BalanceSection extends State<BalanceSection> {
                       child: Row(
                         children: [
                           Text(
-                            'Riwayat Saldo',
+                            'Riwayat Transaksi',
                             style: textStyle.subtitle2,
                           ),
                           const Icon(
@@ -221,7 +260,7 @@ class _BalanceSection extends State<BalanceSection> {
                         ],
                       ),
                       onTap: () {
-                        context.go('/dashboard/balances');
+                        context.go('/dashboard/transactions');
                       },
                     ),
                   ],
@@ -250,8 +289,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
     final prefs = await SharedPreferences.getInstance();
     var categoryJson = prefs.getString('categories_json');
 
-    if (categoryJson.toString().isNotEmpty) {
-      Map<String, dynamic> data = jsonDecode(categoryJson.toString());
+    if (categoryJson.toString().isNotEmpty && categoryJson == '') {
+      Map<String, dynamic> data = jsonDecode(categoryJson!);
       List<dynamic> items = data['data'];
       if (data.isNotEmpty) {
         setState(() {
@@ -263,26 +302,12 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   }
 
   Future<void> getInitializeData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    var url = Uri.parse('https://kerupiah.com/api/categories');
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
-    });
-
-    if (response.statusCode == 200) {
-      prefs.setString('categories_json', response.body);
-      Map<String, dynamic> data = jsonDecode(response.body);
-      List<dynamic> items = data['data'];
-      if (data.isNotEmpty) {
-        setState(() {
-          categories = items;
-          categoryLength = categories.length;
-        });
-      }
+    List<dynamic> items = await CategoryService().get();
+    if (items.isNotEmpty) {
+      setState(() {
+        categories = items;
+        categoryLength = categories.length;
+      });
     }
   }
 

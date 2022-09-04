@@ -24,32 +24,31 @@ class _MyStatefulWidget extends State<ShowBalanceScreen> {
     super.initState();
     setState(() {
       url = 'https://kerupiah.com/api/web-views/balances/${widget.balanceId}';
-      print(url);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          // leading: IconButton(
-          //   icon: const Icon(Icons.arrow_back),
-          //   onPressed: () => {context.go('/dashboard/balances')},
-          // ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                context.go('/dashboard');
-              },
-              icon: Icon(Icons.home_outlined),
-            )
-          ],
-          title: const Text("Detail Saldo"),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/dashboard/deposits'),
         ),
-        body: SafeArea(
-            child: WebViewRenderHtmlStack(
+        actions: [
+          IconButton(
+            onPressed: () => context.go('/dashboard'),
+            icon: const Icon(Icons.home_outlined),
+          )
+        ],
+        title: const Text("Detail Saldo"),
+      ),
+      body: SafeArea(
+        child: WebViewRenderHtmlStack(
           controller: controller,
           url: url,
-        )));
+        ),
+      ),
+    );
   }
 }

@@ -16,7 +16,7 @@ class ActionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       // color: Colors.deepPurple,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(8.0)),
       ),
       child: InkWell(
@@ -36,7 +36,7 @@ class ActionItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             ClipRRect(
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(8.0),
                 topRight: Radius.circular(8.0),
               ),
@@ -54,7 +54,7 @@ class ActionItem extends StatelessWidget {
                         overflow: TextOverflow.clip,
                         strutStyle: const StrutStyle(fontSize: 12.0),
                         text: TextSpan(
-                          style: TextStyle(color: Colors.black),
+                          style: const TextStyle(color: Colors.black),
                           text: title,
                         ),
                       ),

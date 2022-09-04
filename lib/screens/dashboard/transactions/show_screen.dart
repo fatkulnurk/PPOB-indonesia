@@ -25,23 +25,30 @@ class _ShowPageState extends State<ShowTransactionScreen> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    context.go('/dashboard');
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: ((){
-            context.go('/dashboard/transactions');
-          }),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () => context.go('/dashboard'),
+          ),
+          actions: [NavigationRefreshControl(controller: controller)],
+          title: const Text("Detail Transaksi"),
         ),
-        actions: [NavigationRefreshControl(controller: controller)],
-        title: const Text("Detail Transaksi"),
-      ),
-      body: SafeArea(
-        child: WebViewStack(
-          controller: controller,
-          url: url,
+        body: SafeArea(
+          child: WebViewStack(
+            controller: controller,
+            url: url,
+          ),
         ),
       ),
     );

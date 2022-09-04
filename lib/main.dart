@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert' as convert;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/balances/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/deposits/create_screen.dart';
@@ -76,6 +77,7 @@ class App extends StatelessWidget {
       routeInformationParser: _router.routeInformationParser,
       routerDelegate: _router.routerDelegate,
       title: 'KeRupiah',
+      builder: EasyLoading.init(),
     );
   }
 

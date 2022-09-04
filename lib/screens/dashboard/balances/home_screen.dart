@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kerupiah_lite_app/helpers/currency.dart';
+import 'package:kerupiah_lite_app/helpers/time.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/balances/show_screen.dart';
+import 'package:kerupiah_lite_app/services/balance.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
 
 class BalanceHomePageScreen extends StatefulWidget {
   const BalanceHomePageScreen({Key? key}) : super(key: key);
@@ -15,65 +17,41 @@ class BalanceHomePageScreen extends StatefulWidget {
 }
 
 class _BalanceHomePageState extends State<BalanceHomePageScreen> {
-
   @override
   void initState() {
     super.initState();
   }
 
+  Future<bool> _onWillPop() async {
+    context.go('/dashboard');
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    var textStyle = Theme.of(context).textTheme;
-    final dateFormat = DateFormat('yyyy-MM-dd hh:mm');
-
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.go('/dashboard'),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.go('/dashboard'),
+            ),
+            title: const Text('Mutasi Saldo'),
+            bottom: const TabBar(
+              tabs: [
+                Tab(text: "Semua"),
+                Tab(text: "Keluar"),
+                Tab(text: "Masuk"),
+              ],
+            ),
           ),
-          // actions: [
-          //   IconButton(
-          //     onPressed: () {},
-          //     icon: Icon(Icons.date_range),
-          //   )
-          // ],
-          title: const Text('Mutasi Saldo'),
-          bottom: TabBar(
-            tabs: [
-              GestureDetector(
-                child: const Tab(
-                  text: "Semua",
-                ),
-                onTap: () {
-                },
-              ),
-              GestureDetector(
-                child: const Tab(
-                  text: "Keluar",
-                ),
-                onTap: () {
-                },
-              ),
-              GestureDetector(
-                child: const Tab(
-                  text: "Masuk",
-                ),
-                onTap: () {
-                },
-              )
-            ],
+          body: TabBarView(
+            children: [BalanceAll(), BalanceOut(), BalanceIn()],
           ),
-        ),
-        body: const TabBarView(
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            BalanceAll(),
-            BalanceOut(),
-            BalanceIn(),
-          ],
         ),
       ),
     );
@@ -89,27 +67,12 @@ class BalanceAll extends StatefulWidget {
 
 class _BalanceAllState extends State<BalanceAll> {
   late List<dynamic> balances = List.empty();
-  int balanceLength = 0;
 
   Future<void> getInitializeData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    var url = Uri.parse('https://kerupiah.com/api/balances-mutations');
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
+    List<dynamic> items = await BalanceService().getMutations('');
+    setState(() {
+      balances = items;
     });
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
-      List<dynamic> items = data['data'];
-      setState(() {
-        balances = items;
-        balanceLength = balances.length;
-      });
-    }
   }
 
   @override
@@ -120,56 +83,82 @@ class _BalanceAllState extends State<BalanceAll> {
 
   @override
   Widget build(BuildContext context) {
-    var textStyle = Theme.of(context).textTheme;
-    final dateFormat = DateFormat('yyyy-MM-dd hh:mm');
-
-    return ListView(
-      children: ListTile.divideTiles(
-        color: Colors.deepPurple,
-        tiles: balances.map(
-              (balance) => ListTile(
-            onTap: () {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(1, 1, 1, 1),
+      child: ListView.builder(
+        shrinkWrap: true,
+        primary: false,
+        itemCount: balances.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: (() async {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      ShowBalanceScreen(balanceId: balance['id'].toString()),
+                  builder: (context) => ShowBalanceScreen(
+                    balanceId: balances[index]['id'].toString(),
+                  ),
                 ),
               );
-            },
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              child: Text(balance['type'].toString()),
-            ),
-            title: Text(dateFormat
-                .format(DateTime.parse(balance['created_at'].toString()))),
-            subtitle: Flexible(
-              child: RichText(
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                strutStyle: const StrutStyle(
-                    fontSize: 10.0, fontWeight: FontWeight.w500),
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black),
-                  text: balance['message'].toString(),
-                ),
+            }),
+            child: Container(
+              margin: EdgeInsets.only(top: 5),
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.grey),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          toDateTime(balances[index]['created_at'].toString()),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          balances[index]['message'].toString(),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 1,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          toRupiah(balances[index]['amount']),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          balances[index]['type'].toString() == 'IN'
+                              ? 'Masuk'
+                              : 'Keluar',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            trailing: Flexible(
-              child: RichText(
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                strutStyle: const StrutStyle(fontSize: 12.0),
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black),
-                  text: balance['amount'].toString(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ).toList(),
+          );
+        },
+      ),
     );
   }
 }
@@ -183,27 +172,12 @@ class BalanceOut extends StatefulWidget {
 
 class _BalanceOutState extends State<BalanceOut> {
   late List<dynamic> balances = List.empty();
-  int balanceLength = 0;
 
   Future<void> getInitializeData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    var url = Uri.parse('https://kerupiah.com/api/balances-mutations?type=OUT');
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
+    List<dynamic> items = await BalanceService().getMutations('OUT');
+    setState(() {
+      balances = items;
     });
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
-      List<dynamic> items = data['data'];
-      setState(() {
-        balances = items;
-        balanceLength = balances.length;
-      });
-    }
   }
 
   @override
@@ -214,56 +188,82 @@ class _BalanceOutState extends State<BalanceOut> {
 
   @override
   Widget build(BuildContext context) {
-    var textStyle = Theme.of(context).textTheme;
-    final dateFormat = DateFormat('yyyy-MM-dd hh:mm');
-
-    return ListView(
-      children: ListTile.divideTiles(
-        color: Colors.deepPurple,
-        tiles: balances.map(
-          (balance) => ListTile(
-            onTap: () {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(1, 1, 1, 1),
+      child: ListView.builder(
+        shrinkWrap: true,
+        primary: false,
+        itemCount: balances.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: (() async {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      ShowBalanceScreen(balanceId: balance['id'].toString()),
+                  builder: (context) => ShowBalanceScreen(
+                    balanceId: balances[index]['id'].toString(),
+                  ),
                 ),
               );
-            },
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              child: Text(balance['type'].toString()),
-            ),
-            title: Text(dateFormat
-                .format(DateTime.parse(balance['created_at'].toString()))),
-            subtitle: Flexible(
-              child: RichText(
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                strutStyle: const StrutStyle(
-                    fontSize: 10.0, fontWeight: FontWeight.w500),
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black),
-                  text: balance['message'].toString(),
-                ),
+            }),
+            child: Container(
+              margin: EdgeInsets.only(top: 5),
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.grey),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          toDateTime(balances[index]['created_at'].toString()),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          balances[index]['message'].toString(),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 1,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          toRupiah(balances[index]['amount']),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          balances[index]['type'].toString() == 'IN'
+                              ? 'Masuk'
+                              : 'Keluar',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            trailing: Flexible(
-              child: RichText(
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                strutStyle: const StrutStyle(fontSize: 12.0),
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black),
-                  text: balance['amount'].toString(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ).toList(),
+          );
+        },
+      ),
     );
   }
 }
@@ -277,27 +277,12 @@ class BalanceIn extends StatefulWidget {
 
 class _BalanceInState extends State<BalanceIn> {
   late List<dynamic> balances = List.empty();
-  int balanceLength = 0;
 
   Future<void> getInitializeData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    var url = Uri.parse('https://kerupiah.com/api/balances-mutations?type=IN');
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
+    List<dynamic> items = await BalanceService().getMutations('IN');
+    setState(() {
+      balances = items;
     });
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
-      List<dynamic> items = data['data'];
-      setState(() {
-        balances = items;
-        balanceLength = balances.length;
-      });
-    }
   }
 
   @override
@@ -308,56 +293,82 @@ class _BalanceInState extends State<BalanceIn> {
 
   @override
   Widget build(BuildContext context) {
-    var textStyle = Theme.of(context).textTheme;
-    final dateFormat = DateFormat('yyyy-MM-dd hh:mm');
-
-    return ListView(
-      children: ListTile.divideTiles(
-        color: Colors.deepPurple,
-        tiles: balances.map(
-              (balance) => ListTile(
-            onTap: () {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(1, 1, 1, 1),
+      child: ListView.builder(
+        shrinkWrap: true,
+        primary: false,
+        itemCount: balances.length,
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: (() async {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>
-                      ShowBalanceScreen(balanceId: balance['id'].toString()),
+                  builder: (context) => ShowBalanceScreen(
+                    balanceId: balances[index]['id'].toString(),
+                  ),
                 ),
               );
-            },
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              child: Text(balance['type'].toString()),
-            ),
-            title: Text(dateFormat
-                .format(DateTime.parse(balance['created_at'].toString()))),
-            subtitle: Flexible(
-              child: RichText(
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                strutStyle: const StrutStyle(
-                    fontSize: 10.0, fontWeight: FontWeight.w500),
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black),
-                  text: balance['message'].toString(),
-                ),
+            }),
+            child: Container(
+              margin: EdgeInsets.only(top: 5),
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.grey),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          toDateTime(balances[index]['created_at'].toString()),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          balances[index]['message'].toString(),
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 1,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          toRupiah(balances[index]['amount']),
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          balances[index]['type'].toString() == 'IN'
+                              ? 'Masuk'
+                              : 'Keluar',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-            trailing: Flexible(
-              child: RichText(
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                strutStyle: const StrutStyle(fontSize: 12.0),
-                text: TextSpan(
-                  style: const TextStyle(color: Colors.black),
-                  text: balance['amount'].toString(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ).toList(),
+          );
+        },
+      ),
     );
   }
 }

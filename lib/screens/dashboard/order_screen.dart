@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/checkout_screen.dart';
+import 'package:kerupiah_lite_app/services/group.dart';
+import 'package:kerupiah_lite_app/services/product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -28,23 +30,12 @@ class _OrderState extends State<OrderScreen> {
   void initState() {
     super.initState();
     initializeData();
-    // getProducts();
+    getProducts();
   }
 
   void initializeData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    var url =
-        Uri.parse('https://kerupiah.com/api/groups?category_id=' + widget.id);
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
-    });
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
+    Map<String, dynamic> data = await GroupService().get(widget.id);
+    if (data.isNotEmpty) {
       setState(() {
         groups = data['data'];
       });
@@ -52,19 +43,8 @@ class _OrderState extends State<OrderScreen> {
   }
 
   void getProducts() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    var url = Uri.parse(
-        'https://kerupiah.com/api/products?category_id=${widget.id}&group_id=$selectedGroupId');
-    var response = await http.get(url, headers: <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token'
-    });
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
+    Map<String, dynamic> data = await ProductService().get(widget.id, selectedGroupId);
+    if (data.isNotEmpty) {
       setState(() {
         products = data['data'];
       });
@@ -129,28 +109,24 @@ class _OrderState extends State<OrderScreen> {
                   if (group['label'] != null)
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Colors.yellowAccent,
                         borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: Colors.orange),
+                        border: Border.all(color: Colors.black),
                       ),
-                      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                      child: Card(
-                        // elevation: 3,
-                        // shadowColor: Colors.grey,
-                        child: ListTile(
-                          title: Container(
-                            padding: const EdgeInsets.only(top: 5, bottom: 5),
-                            child: const Text(
-                              "Catatan:",
-                              style: TextStyle(fontSize: 16),
-                            ),
+                      margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+                      child: ListTile(
+                        title: Container(
+                          padding: const EdgeInsets.only(top: 5, bottom: 5),
+                          child: const Text(
+                            "Catatan:",
+                            style: TextStyle(fontSize: 18),
                           ),
-                          subtitle: Container(
-                            padding: const EdgeInsets.only(top: 0, bottom: 10),
-                            child: Text(
-                              "Pada bagian Tujuan Pengisian / Nomor Pelanggan. ${group['label']}",
-                              style: TextStyle(fontSize: 16),
-                            ),
+                        ),
+                        subtitle: Container(
+                          padding: const EdgeInsets.only(top: 0, bottom: 10),
+                          child: Text(
+                            "Pada bagian Tujuan Pengisian / Nomor Pelanggan. ${group['label']}",
+                            style: TextStyle(fontSize: 16),
                           ),
                         ),
                       ),

@@ -1,11 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+import '../services/auth.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -15,62 +11,70 @@ class LoginPageScreen extends StatefulWidget {
 }
 
 class _State extends State<LoginPageScreen> {
+  Future<bool> _onWillPop() async {
+    context.go('/');
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // backgroundColor: Colors.yellowAccent,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: (() {
-            context.go('/');
-          }),
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: (() {
+              context.go('/');
+            }),
+          ),
+          title: const Text('Masuk'),
         ),
-        title: const Text('Masuk'),
-      ),
-      body: SingleChildScrollView(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.center,
-              end: Alignment.bottomLeft,
-              colors: [
-                Colors.white,
-                Colors.white,
+        body: SingleChildScrollView(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.center,
+                end: Alignment.bottomLeft,
+                colors: [
+                  Colors.white,
+                  Colors.white,
+                ],
+              ),
+            ),
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            padding: const EdgeInsets.fromLTRB(0, 30, 0, 10),
+            child: Column(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(5),
+                  child: FormWidget(),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                GestureDetector(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+                    child: Container(
+                      height: 100,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white70,
+                      ),
+                      child: const Text('Belum punya akun? Mendaftar sekarang'),
+                    ),
+                  ),
+                  onTap: (() {
+                    context.go('/signup');
+                  }),
+                )
               ],
             ),
-          ),
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          padding: const EdgeInsets.fromLTRB(0, 30, 0, 10),
-          child: Column(
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(5),
-                child: FormWidget(),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              GestureDetector(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
-                  child: Container(
-                    height: 100,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.white70,
-                    ),
-                    child: const Text('Belum punya akun? Mendaftar sekarang'),
-                  ),
-                ),
-                onTap: (() {
-                  context.go('/signup');
-                }),
-              )
-            ],
           ),
         ),
       ),
@@ -92,34 +96,9 @@ class _FormWidgetState extends State<FormWidget> {
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      final fcmToken = await FirebaseMessaging.instance.getToken();
-      final prefs = await SharedPreferences.getInstance();
-      var url = Uri.parse('https://kerupiah.com/api/login');
-      Map<String, String> headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      };
-      var body = jsonEncode({
-        'email': _email ?? '',
-        'password': _password ?? '',
-        'firebase_key': fcmToken
-      });
-      var response = await http.post(
-        url,
-        headers: headers,
-        body: body,
-      );
-
-      Map<String, dynamic> data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        prefs.setString('token', data['data']['token']);
-        prefs.setString('user_id', data['data']['user']['id']);
-        prefs.setString('user_username', data['data']['user']['username']);
-        prefs.setString('user_email', data['data']['user']['email']);
-        prefs.setString('balance_string', data['data']['balance_string']);
+      bool isLoggin = await AuthService().login(_email, _password);
+      if (isLoggin) {
         context.go('/dashboard');
-      } else {
-        showAlertDialog(context, 'Gagal Masuk', data['message'] ?? '');
       }
     }
   }
@@ -200,28 +179,4 @@ class _FormWidgetState extends State<FormWidget> {
       ),
     );
   }
-}
-
-showAlertDialog(BuildContext context, String title, String message) {
-  // set up the button
-  Widget okButton = TextButton(
-    child: Text("Tutup"),
-    onPressed: () {
-      Navigator.pop(context, true);
-    },
-  );
-
-  // set up the AlertDialog
-  AlertDialog alert = AlertDialog(
-    title: Text(title),
-    content: Text(message),
-  );
-
-  // show the dialog
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-  );
 }
