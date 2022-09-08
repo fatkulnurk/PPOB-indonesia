@@ -8,6 +8,7 @@ import 'package:kerupiah_lite_app/screens/dashboard/balances/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/deposits/create_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/deposits/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/home_screen.dart';
+import 'package:kerupiah_lite_app/screens/dashboard/notifications/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/profiles/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/dashboard/transactions/home_screen.dart';
 import 'package:kerupiah_lite_app/screens/login_screen.dart';
@@ -138,6 +139,12 @@ class App extends StatelessWidget {
         path: '/dashboard/profiles/home',
         builder: (BuildContext context, GoRouterState state) {
           return const ProfileHomePageScreen();
+        },
+      ),
+      GoRoute(
+        path: '/dashboard/notifications',
+        builder: (BuildContext context, GoRouterState state) {
+          return const NotificationHomePageScreen();
         },
       ),
       GoRoute(

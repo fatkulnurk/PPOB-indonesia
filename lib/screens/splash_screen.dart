@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:kerupiah_lite_app/services/auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kerupiah_lite_app/helpers/config.dart' as config;
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -144,7 +144,7 @@ class _SplashScreen extends State<SplashScreen> {
               const Align(
                 alignment: Alignment.center,
                 child: Text(
-                  'Copyright © 2022 KeRupiah.Com',
+                  'Copyright © 2022 ${config.appName}',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white,

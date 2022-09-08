@@ -60,9 +60,6 @@ class _DashboardHomePageScreen extends State<DashboardHomePageScreen> {
         break;
 
     }
-    // setState(() {
-    //   _selectedNavbar = index;
-    // });
   }
 
   @override
@@ -75,6 +72,17 @@ class _DashboardHomePageScreen extends State<DashboardHomePageScreen> {
         drawer: const DrawerWidget(),
         appBar: AppBar(
           title: const Text(config.appName),
+          actions: <Widget> [
+            IconButton(
+              icon: const Icon(
+                Icons.add_alert_rounded,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                context.go('/dashboard/notifications');
+              },
+            )
+          ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -117,21 +125,6 @@ class _DashboardHomePageScreen extends State<DashboardHomePageScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-                // const Card(
-                //   margin: EdgeInsets.all(1),
-                //   child: ListTile(
-                //     title: Padding(
-                //       padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                //       child: Align(
-                //         alignment: Alignment.topCenter,
-                //         child: Text(
-                //           "Jika terdapat kendala dalam transaksi atau deposit, silakan menghubungi kami menggunakan kontak yang tertera di halaman hubungi kami.",
-                //           style: TextStyle(fontSize: 16),
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                // ),
                 const SizedBox(
                   height: 30,
                 ),
