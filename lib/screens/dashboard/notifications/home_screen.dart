@@ -19,7 +19,7 @@ class _NotificationHomePageState extends State<NotificationHomePageScreen> {
       appBar: AppBar(
         title: Text("Pemberitahuan"),
       ),
-      body: Text('aaa')
+      body: Text('masih proses pembuatan.')
     );
   }
 }
